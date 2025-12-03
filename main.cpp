@@ -10,6 +10,8 @@
 #include "Sensor.h"
 #include "Central.h"
 
+using namespace std;
+
 Forest floresta;
 Central central(&floresta);
 bool simulacao_ativa = true;
@@ -28,7 +30,7 @@ void* thread_gerador_fogo(void* args) {
 }
 
 int main() {
-    std::vector<Sensor*> lista_sensores;
+    vector<Sensor*> lista_sensores;
     int id_contador = 0;
 
     for (int i = 1; i < LINHA - 1; i += 3) {
@@ -50,7 +52,7 @@ int main() {
 
     while (simulacao_ativa) {
         floresta.imprimir();
-        std::cout << "Monitorando... (Pressione Ctrl+C para sair)\n";
+        cout << "Monitorando... (Pressione Ctrl+C para sair)\n";
         sleep(1);
     }
 

@@ -6,6 +6,7 @@
 #include <string>
 #include "defs.h"
 #include "Forest.h"
+using namespace std;
 
 class Central {
 private:
@@ -13,10 +14,10 @@ private:
     pthread_t thread_central;
     bool ativa;
 
-    std::vector<MensagemIncendio> fila_mensagens;
+    vector<MensagemIncendio> fila_mensagens;
     pthread_mutex_t mutex_fila;
 
-    std::vector<Coordenada> incendios_atendidos;
+    vector<Coordenada> incendios_atendidos;
 
     static void* threadHelper(void* context);
     void cicloDeVida();

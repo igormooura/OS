@@ -3,6 +3,8 @@
 #include <fstream>
 #include <unistd.h>
 
+using namespace std;
+
 Central::Central(Forest* f) {
     this->floresta = f;
     this->ativa = false;
@@ -71,7 +73,7 @@ void Central::cicloDeVida() {
 }
 
 void Central::logarIncendio(MensagemIncendio msg) {
-    std::ofstream arquivo("incendios.log", std::ios::app);
+    ofstream arquivo("incendios.log", ios::app);
     
     if (arquivo.is_open()) {
         arquivo << "Incendio detectado pelo Sensor " << msg.sensor_id << "\n";

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <unistd.h>
 
+using namespace std;
+
 Forest::Forest(){
     pthread_mutex_init(&mapa_mutex, NULL);
     inicializar();
@@ -45,24 +47,24 @@ void Forest::imprimir(){
 
     system("clear");
 
-    std::cout << " --- Monitor de Incendios Florestais --- \n";
+    cout << " --- Monitor de Incendios Florestais --- \n";
     for (int i = 0; i < LINHA; ++i) {
         for (int j = 0; j < COLUNA; ++j) {
             char celula = grid[i][j];
             if (celula == TIPO_FOGO) {
-                std::cout << "\033[1;31m" << celula << "\033[0m ";
+                cout << "\033[1;31m" << celula << "\033[0m ";
             } 
             else if (celula == TIPO_LIVRE) {
-                std::cout << "\033[32m" << celula << "\033[0m ";
+                cout << "\033[32m" << celula << "\033[0m ";
             } 
             else if (celula == TIPO_SENSOR) {
-                std::cout << "\033[1;33m" << celula << "\033[0m ";
+                cout << "\033[1;33m" << celula << "\033[0m ";
             } 
             else {
-                std::cout << celula << " ";
+                cout << celula << " ";
             }
         }
-        std::cout << "\n";
+        cout << "\n";
     }
     pthread_mutex_unlock(&mapa_mutex);
 }

@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <ctime>
 
+using namespace std;
+
 Sensor* Sensor::mapa_sensores[LINHA][COLUNA] = {NULL};
 
 Sensor::Sensor(int id, int x, int y, Forest* floresta, Central* central) {
@@ -114,7 +116,7 @@ void Sensor::cicloDeVida() {
                     timeinfo = localtime(&agora);
 
                     strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
-                    msg.horario = std::string(buffer);
+                    msg.horario = string(buffer);
 
                     propagarMensagem(msg);
                     usleep(500000); 
