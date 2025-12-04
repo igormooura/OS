@@ -1,43 +1,51 @@
 #ifndef CENTRAL_H
 #define CENTRAL_H
 
-#include <pthread.h>
 #include <vector>
-#include <string>
-#include "defs.h"
+#include <pthread.h>
 #include "Forest.h"
-using namespace std;
+
+class Central;
+
+struct DadosBombeiro {
+    Forest* floresta;
+    int x;
+    int y;
+    Central* central;
+};
 
 class Central {
 private:
     Forest* floresta;
-    pthread_t thread_central;
     bool ativa;
+    pthread_t thread_central;
 
-    vector<MensagemIncendio> fila_mensagens;
     pthread_mutex_t mutex_fila;
+    std::vector<MensagemIncendio> fila_mensagens;
+    std::vector<Coordenada> incendios_atendidos;
 
-    vector<Coordenada> incendios_atendidos;
+    bool obterProximaMensagem(MensagemIncendio& msg);
+    void processarIncendio(const MensagemIncendio& msg);
+    void spawnBombeiro(DadosBombeiro* dados);
 
     static void* threadHelper(void* context);
-    void cicloDeVida();
-    void logarIncendio(MensagemIncendio msg);
-    
-    static void* rotinaBombeiro(void* arg); 
+    static void* rotinaBombeiro(void* arg);
 
 public:
     Central(Forest* f);
     ~Central();
 
+    void receberMensagem(MensagemIncendio msg);
     void iniciar();
     void aguardar();
 
-    void receberMensagem(MensagemIncendio msg);
-};
+    bool incendioJaAtendido(const Coordenada& coord);
+    bool isIncendioDuplicado(const Coordenada& local_fogo);
 
-struct DadosBombeiro {
-    Forest* floresta;
-    int x, y;
+    void apagarIncendio(DadosBombeiro* dados);
+    void cicloDeVida();
+
+    void RegistraLog(MensagemIncendio msg);
 };
 
 #endif
