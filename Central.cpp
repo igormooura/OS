@@ -8,6 +8,8 @@ using namespace std;
 Central::Central(Forest* f) {
     this->floresta = f;
     this->ativa = false;
+
+    // inicializa o mutex pra evitar que 2 threads diferentes usem a mesma mensagem
     pthread_mutex_init(&mutex_fila, NULL);
 }
 
@@ -33,6 +35,7 @@ void Central::iniciar() {
 }
 
 void Central::aguardar() {
+    //espera a central terminar, ou seja, no final do programa
     pthread_join(thread_central, NULL);
 }
 
@@ -60,6 +63,8 @@ void Central::apagarIncendio(DadosBombeiro* dados) {
 }
 
 bool Central::obterProximaMensagem(MensagemIncendio& msg) {
+
+    // trava a fila, impedindo que outra thread acesse enquanto uma thread esteja acessando a fila  
     pthread_mutex_lock(&mutex_fila);
 
     if (fila_mensagens.empty()) {
@@ -95,7 +100,13 @@ void Central::processarIncendio(const MensagemIncendio& msg) {
 
 void Central::spawnBombeiro(DadosBombeiro* dados) {
     pthread_t t;
+
+    // cria o bombeiro independente
     pthread_create(&t, NULL, &Central::rotinaBombeiro, dados);
+
+    // detach é usado porque o bombeiro é uma thread independente
+    // não usamos join pra dar o NULL pq a Central não pode ficar esperando o bombeiro terminar.
+    // quando a thread acabar, o detach limpa automaticamente os recursos.
     pthread_detach(t);
 }
 
@@ -129,9 +140,9 @@ void* Central::rotinaBombeiro(void* arg) {
     sleep(2);
 
     // dados->central porque rotinaBombeiro é static
-    // e não tem acesso ao 'this'. Então o ponteiro da Central
-    // é enviado dentro de DadosBombeiro para permitir chamar
-    // métodos da Central a partir da thread.
+    // e não tem acesso ao 'this'. 
+    // Então o ponteiro da Central é enviado dentro de DadosBombeiro para permitir chamar
+    // métodos da Central a partir da thread
 
     // dados->central acessa os membros da struct
     // -> apagarIncendio chama o método
