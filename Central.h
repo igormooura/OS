@@ -8,6 +8,12 @@
 #include "Forest.h"
 using namespace std;
 
+struct DadosBombeiro {
+    Forest* floresta;
+    int x, y;
+    Central* central;
+};
+
 class Central {
 private:
     Forest* floresta;
@@ -20,10 +26,10 @@ private:
     vector<Coordenada> incendios_atendidos;
 
     static void* threadHelper(void* context);
+    static void* rotinaBombeiro(void* arg);
+
     void cicloDeVida();
-    void logarIncendio(MensagemIncendio msg);
-    
-    static void* rotinaBombeiro(void* arg); 
+    void RegistraLog(MensagemIncendio msg);
 
 public:
     Central(Forest* f);
@@ -31,13 +37,12 @@ public:
 
     void iniciar();
     void aguardar();
-
     void receberMensagem(MensagemIncendio msg);
-};
 
-struct DadosBombeiro {
-    Forest* floresta;
-    int x, y;
+    bool incendioJaAtendido(const Coordenada& coord);
+    bool isIncendioDuplicado(const Coordenada& local_fogo);
+
+    void apagarIncendio(DadosBombeiro* dados);
 };
 
 #endif

@@ -35,6 +35,28 @@ void Central::aguardar() {
     pthread_join(thread_central, NULL);
 }
 
+bool Central::incendioJaAtendido(const Coordenada& coord) {
+    for (const auto& c : incendios_atendidos) {
+        if (c == coord) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Central::isIncendioDuplicado(const Coordenada& local_fogo) {
+    for (const auto& coord : incendios_atendidos) {
+        if (coord == local_fogo) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Central::apagarIncendio(DadosBombeiro* dados) {
+    dados->floresta->setTipo(dados->x, dados->y, TIPO_LIVRE);
+}
+
 void Central::cicloDeVida() {
     while (ativa) {
         MensagemIncendio msgAtual;
@@ -49,32 +71,35 @@ void Central::cicloDeVida() {
         pthread_mutex_unlock(&mutex_fila);
 
         if (temMensagem) {
-            bool duplicado = false;
-            for (const auto& coord : incendios_atendidos) {
-                if (coord == msgAtual.local_fogo) {
-                    duplicado = true;
-                    break;
-                }
-            }
+
+            bool duplicado = incendioJaAtendido(msgAtual.local_fogo);
 
             if (!duplicado) {
                 incendios_atendidos.push_back(msgAtual.local_fogo);
-                logarIncendio(msgAtual);
+
+                RegistraLog(msgAtual);
 
                 pthread_t t_bombeiro;
-                DadosBombeiro* dados = new DadosBombeiro{floresta, msgAtual.local_fogo.x, msgAtual.local_fogo.y};
-                
+
+                DadosBombeiro* dados = new DadosBombeiro{
+                    floresta,
+                    msgAtual.local_fogo.x,
+                    msgAtual.local_fogo.y,
+                    this   
+                };
+
                 pthread_create(&t_bombeiro, NULL, &Central::rotinaBombeiro, dados);
-                pthread_detach(t_bombeiro); 
+                pthread_detach(t_bombeiro);
             }
         }
+
         usleep(100000);
     }
 }
 
-void Central::logarIncendio(MensagemIncendio msg) {
+void Central::RegistraLog(MensagemIncendio msg) {
     ofstream arquivo("incendios.log", ios::app);
-    
+
     if (arquivo.is_open()) {
         arquivo << "Incendio detectado pelo Sensor " << msg.sensor_id << "\n";
         arquivo << "Local: [" << msg.local_fogo.x << ", " << msg.local_fogo.y << "]\n";
@@ -86,9 +111,11 @@ void Central::logarIncendio(MensagemIncendio msg) {
 
 void* Central::rotinaBombeiro(void* arg) {
     DadosBombeiro* dados = (DadosBombeiro*)arg;
-    
+
     sleep(2);
-    dados->floresta->setTipo(dados->x, dados->y, TIPO_LIVRE);
+
+    // agora pode chamar a função da Central corretamente
+    dados->central->apagarIncendio(dados);
 
     delete dados;
     return NULL;
